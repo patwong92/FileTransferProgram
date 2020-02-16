@@ -1,0 +1,47 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "Main.h"
+#include "windows.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+MYMENU MENU
+BEGIN
+    POPUP "&Run"
+    BEGIN
+        MENUITEM "Run Server",                  ID_RUN_SERVER
+        MENUITEM "Run Client",                  ID_RUN_CLIENT
+        MENUITEM "Settings",                    ID_RUN_SETTINGS
+    END
+    MENUITEM "&Help",                           ID_HELP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 311, 179
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,200,158,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,254,158,50,14
+    EDITTEXT        IDC_EDIT_IP_ADDRESS,122,21,166,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PORT_NUMBER,122,42,166,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PACKET_SIZE,122,84,167,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Open File",IDC_BUTTON_OPEN_FILE,49,121,63,14
+    EDITTEXT        IDC_EDIT_OPEN_FILE,122,122,165,12,ES_AUTOHSCROLL
+    CONTROL         "TCP",IDC_RADIO_TCP,"Button",BS_AUTORADIOBUTTON,122,105,29,10
+    CONTROL         "UDP",IDC_RADIO_UDP,"Button",BS_AUTORADIOBUTTON,155,105,30,10
+    LTEXT           "IP Address",IDC_TEXT_IP_ADDRESS,45,23,62,10,SS_CENTERIMAGE,WS_EX_RIGHT
+    LTEXT           "Port Number",IDC_TEXT_PORT_NUMBER,51,42,57,10,0,WS_EX_RIGHT
+    LTEXT           "Client Packet size",IDC_STATIC,36,87,76,9,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_SEND_FREQUENCY,122,63,167,12,ES_AUTOHSCROLL
+    LTEXT           "Client Send Frequency",IDC_STATIC,35,64,76,9,0,WS_EX_RIGHT
+END

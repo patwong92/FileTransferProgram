@@ -3,6 +3,7 @@
 SOCKET AcceptSocket;
 WSAEVENT UDPReceiveEvent;
 SOCKET* ListenSocket;
+HWND serveroutput;
 
 DWORD WINAPI RunServer(LPVOID lpParameter)
 {
@@ -12,17 +13,19 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     HANDLE ThreadHandle;
     DWORD ThreadId;
     WSAEVENT AcceptEvent;
-    char msg[63];
+    TCHAR msg[63];
 
     Settings* s = (Settings*)lpParameter;
     int protocol = s->protocol;
+    serveroutput = s->hwnd_serverout;
 
     WSACleanup();
 
     //Start winsock
     if ((Ret = WSAStartup(0x0202, &wsaData)) != 0)
     {
-        OutputDebugString("WSAStartup failed with error \n");
+        TCHAR error_msg[] = "WSAStartup failed with error.";
+        SendOutputMessage(serveroutput, error_msg);
         WSACleanup();
         return FALSE;
     }
@@ -31,7 +34,9 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     ListenSocket = (SOCKET*)malloc(sizeof(SOCKET*));
     if (CreateSocket(ListenSocket, protocol) != 0)
     {
-        OutputDebugString("Can't create socket \n");
+        TCHAR error_msg[] = "Can't create socket.";
+        SendOutputMessage(serveroutput, error_msg);
+
         free(ListenSocket);
         WSACleanup();
         return FALSE;
@@ -43,25 +48,29 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     //Bind ip address and port to socket
     if (bind(*ListenSocket, (PSOCKADDR)&InternetAddr, sizeof(InternetAddr)) == SOCKET_ERROR)
     {
-        OutputDebugString("bind() failed with error \n");
+        TCHAR error_msg[] = "Can't bind ip address and port to socket";
+        SendOutputMessage(serveroutput, error_msg);
+
         free(ListenSocket);
         WSACleanup();
         return FALSE;
     }
-    
-
 
     //OutputDebugString(GetInitializationMessage(s));
 
     if (protocol == TCP)
     {
-        char message[] = "Running a TCP server";
-        SendOutputMessage(s->hwnd_serverout, message);
+        TCHAR connect_msg[] = "Successful TCP server connection";
+        TCHAR reading_msg[] = "Server is reading connections...";
+
+        SendOutputMessage(serveroutput, connect_msg);
 
         //Open a listen socket
         if (listen(*ListenSocket, 1))
         {
-            OutputDebugString("listen() failed with error \n");
+            TCHAR error_msg[] = "Listen failed!";
+            SendOutputMessage(serveroutput, error_msg);
+
             free(ListenSocket);
             WSACleanup();
             return FALSE;
@@ -69,7 +78,9 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
 
         if ((AcceptEvent = WSACreateEvent()) == WSA_INVALID_EVENT)
         {
-            OutputDebugString("WSACreateEvent() failed with error \n");
+            TCHAR error_msg[] = "Can't call WSACreateEvent()!";
+            SendOutputMessage(serveroutput, error_msg);
+
             free(ListenSocket);
             WSACleanup();
             return FALSE;
@@ -78,7 +89,9 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
         // Create a worker thread to service completed I/O requests. 
         if ((ThreadHandle = CreateThread(NULL, 0, TCPWorkerThread, (LPVOID)AcceptEvent, 0, &ThreadId)) == NULL)
         {
-            OutputDebugString("CreateThread failed with error \n");
+            TCHAR error_msg[] = "Can't create accept event thread!";
+            SendOutputMessage(serveroutput, error_msg);
+
             free(ListenSocket);
             WSACleanup();
             return FALSE;
@@ -86,13 +99,14 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
 
         while (TRUE)
         {
-            OutputDebugString("Accepting connections...\n");
             AcceptSocket = accept(*ListenSocket, NULL, NULL);
-            OutputDebugString("Reading connections...\n");
+            SendOutputMessage(serveroutput, reading_msg);
 
             if (WSASetEvent(AcceptEvent) == FALSE)
             {
-                OutputDebugString("WSASetEvent failed with error %d\n");
+                TCHAR error_msg[] = "Can't set WSA event!";
+                SendOutputMessage(serveroutput, error_msg);
+
                 free(ListenSocket);
                 WSACleanup();
                 return FALSE;
@@ -104,16 +118,15 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     
     if (protocol == UDP) 
     {
- /*       SOCKADDR_IN client;
-        int client_len = sizeof(client);*/
-
-        char message[] = "Running a UDP server";
-        SendOutputMessage(s->hwnd_serverout, message);
+        TCHAR message[] = "Successful UDP server connection";
+        SendOutputMessage(serveroutput, message);
 
         // Create a worker thread to service completed I/O requests. 
         if ((ThreadHandle = CreateThread(NULL, 0, UDPWorkerThread, ListenSocket, 0, &ThreadId)) == NULL)
         {
-            OutputDebugString("CreateThread failed with error \n");
+            TCHAR error_msg[] = "Can't create UDP thread!";
+            SendOutputMessage(serveroutput, error_msg);
+
             free(ListenSocket);
             WSACleanup();
             return FALSE;
@@ -146,7 +159,8 @@ DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
 
             if (Index == WSA_WAIT_FAILED)
             {
-                OutputDebugString("WSAWaitForMultipleEvents failed with error %d\n");
+                TCHAR error_msg[] = "WSAWaitForMultipleEvents failed with error!";
+                SendOutputMessage(serveroutput, error_msg);
                 return FALSE;
             }
 
@@ -164,12 +178,12 @@ DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
         if ((SocketInfo = (LPSOCKET_INFORMATION)GlobalAlloc(GPTR,
             sizeof(SOCKET_INFORMATION))) == NULL)
         {
-            OutputDebugString("GlobalAlloc() failed with error %d\n");
+            TCHAR error_msg[] = "GlobalAlloc failed with error!";
+            SendOutputMessage(serveroutput, error_msg);
             return FALSE;
         }
 
         // Fill in the details of our accepted socket.
-
         SocketInfo->Socket = AcceptSocket;
         ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
         SocketInfo->BytesSEND = 0;
@@ -178,18 +192,26 @@ DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
         SocketInfo->DataBuf.buf = SocketInfo->Buffer;
 
         Flags = 0;
+        
+
+        TCHAR receive_msg[] = "Server received:";
+        SendOutputMessage(serveroutput, receive_msg);
         if (WSARecv(SocketInfo->Socket, &(SocketInfo->DataBuf), 1, &RecvBytes, &Flags,
             &(SocketInfo->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
-                OutputDebugString("WSARecv() failed with error %d\n");
+                TCHAR error_msg[] = "WSARecv() failed with error!";
+                SendOutputMessage(serveroutput, error_msg);
                 return FALSE;
             }
         }
 
-        OutputDebugString("Reading connections...\n");
+        //TCHAR reading_msg[] = "Finished reading connecton...";
+        //SendOutputMessage(serveroutput, reading_msg);
+        
     }
+
 
     return TRUE;
 }
@@ -205,12 +227,13 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
 
     if (Error != 0)
     {
-        OutputDebugString("I/O operation failed with error %d\n");
+        TCHAR error_msg[] = "I/O operation failed with error!";
+        SendOutputMessage(serveroutput, error_msg);
     }
 
     if (BytesTransferred == 0)
     {
-        OutputDebugString("Closing socket %d\n");
+        OutputDebugString("Closing socket...");
     }
 
     if (Error != 0 || BytesTransferred == 0)
@@ -245,12 +268,15 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         SI->DataBuf.buf = SI->Buffer + SI->BytesSEND;
         SI->DataBuf.len = SI->BytesRECV - SI->BytesSEND;
 
+        SendOutputMessage(serveroutput, SI->Buffer); //Output text 
+        
         if (WSASend(SI->Socket, &(SI->DataBuf), 1, &SendBytes, 0,
             &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
-                OutputDebugString("WSASend() failed with error %d\n");
+                TCHAR error_msg[] = "WSASend() failed with error!";
+                SendOutputMessage(serveroutput, error_msg);
                 return;
             }
         }
@@ -272,11 +298,23 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         {
             if (WSAGetLastError() != WSA_IO_PENDING)
             {
-                OutputDebugString("WSARecv() failed with error %d\n");
+                TCHAR error_msg[] = "WSARecv() failed with error!";
+                SendOutputMessage(serveroutput, error_msg);
+
                 return;
             }
         }
     }
+
+
+    if (SI->BytesRECV > 0)
+    {
+        TCHAR resp_msg[] = "Number of bytes received =";
+        TCHAR resp_byte[20];
+        _itoa(SI->BytesRECV, resp_byte, 10);
+        SendOutputMessage(serveroutput, resp_msg, resp_byte);
+    }
+
 }
 
 DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
@@ -297,7 +335,8 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
     if ((SocketInfo = (LPSOCKET_INFORMATION)GlobalAlloc(GPTR,
         sizeof(SOCKET_INFORMATION))) == NULL)
     {
-        OutputDebugString("GlobalAlloc() failed with error \n");
+        TCHAR error_msg[] = "GlobalAlloc() failed with error!";
+        SendOutputMessage(serveroutput, error_msg);
         return FALSE;
     }
 
@@ -319,7 +358,9 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
         if (rc != 0) {
             err = WSAGetLastError();
             if (err != WSA_IO_PENDING) {
-                OutputDebugString("WSARecvFrom failed with error\n");
+                TCHAR error_msg[] = "WSARecvFrom failed with error!";
+                SendOutputMessage(serveroutput, error_msg);
+
                 WSACloseEvent(SocketInfo->Overlapped.hEvent);
                 closesocket(SocketInfo->Socket);
                 WSACleanup();
@@ -328,29 +369,29 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
             else {
                 rc = WSAWaitForMultipleEvents(1, &SocketInfo->Overlapped.hEvent, TRUE, WSA_INFINITE, TRUE);
                 if (rc == WSA_WAIT_FAILED) {
-                    OutputDebugString("WSAWaitForMultipleEvents failed with error.");
+                    TCHAR error_msg[] = "WSAWaitForMultipleEvents failed with error!";
+                    SendOutputMessage(serveroutput, error_msg);
                     retval = 1;
                 }
 
                 rc = WSAGetOverlappedResult(SocketInfo->Socket, &SocketInfo->Overlapped, &SocketInfo->BytesRECV,
                     FALSE, &Flags);
                 if (rc == FALSE) {
-                    OutputDebugString("WSArecvFrom failed with error.\n");
+                    TCHAR error_msg[] = "WSARecvFrom failed with error!";
+                    SendOutputMessage(serveroutput, error_msg);
                     retval = 1;
                 }
                 else
                 {
-                    OutputDebugString("Number of received bytes = ");
+                    TCHAR receive_msg1[] = "Number of received bytes =";
+                    TCHAR receive_msg2[] = "Server received:";
                     TCHAR resp_byte[20];
                     _itoa(SocketInfo->BytesRECV, resp_byte, 10);
-                    OutputDebugString(resp_byte);
-                    OutputDebugString("\n");
-                    OutputDebugString("Received:\n");
-                    OutputDebugString(SocketInfo->Buffer);
-                    OutputDebugString("\n");
-                }
 
-                OutputDebugString("Finished receiving. Closing socket.\n");
+                    SendOutputMessage(serveroutput, receive_msg1, resp_byte);
+                    SendOutputMessage(serveroutput, receive_msg2);
+                    SendOutputMessage(serveroutput, SocketInfo->Buffer);
+                }
             }
 
         }
@@ -372,7 +413,8 @@ DWORD CreateSocket(SOCKET* socket, int protocol)
     }
 
     if ((*socket = WSASocket(AF_INET, type, protocol_flag, NULL, 0, WSA_FLAG_OVERLAPPED)) == INVALID_SOCKET) {
-        OutputDebugString("Can't create socket!");
+        TCHAR error_msg[] = "Can't create socket!";
+        SendOutputMessage(serveroutput, error_msg);
         return 1;
     }
 
@@ -390,22 +432,3 @@ SOCKADDR_IN FillAddrStructure(Settings* setting)
     return addr;
 }
 
-const char* GetInitializationMessage(Settings* s)
-{
-    char protocol[64];
-
-    switch (s->protocol)
-    {
-    case (TCP):
-        strcpy(protocol, "Established a TCP connection.\n");
-        break;
-    case UDP:
-        strcpy(protocol, "Ready to receive UDP packets.\n");
-        break;
-    default:
-        strcpy(protocol, "Server has somehow connected to neither UDP nor TCP.\n");
-        break;
-    }
-
-    return protocol;
-}

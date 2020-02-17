@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "Settings.h"
 #include "Utilities.h"
-#include "Widgets.h"
+#include "Widgets.h";
 
 void RunClient(Settings* s);
 DWORD WINAPI TCPClient(LPVOID lpParameter);

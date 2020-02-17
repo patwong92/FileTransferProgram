@@ -11,7 +11,7 @@ void SetDefaultSettings(Settings* s, int port, TCHAR ip_address[], int protocol,
     strncpy(s->save_file_path, dfile_path, TEXT_BUFFER);
 }
 
-void ProtocolAsString(int protocol, char* buffer)
+void ProtocolAsString(int protocol, TCHAR* buffer)
 {
     const TCHAR* tcp = "TCP";
     const TCHAR* udp = "UDP";

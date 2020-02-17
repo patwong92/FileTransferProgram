@@ -1,6 +1,6 @@
 #include "Utilities.h"
 
-int OpenFileToRead(FILE** read_file, char* read_path)
+int OpenFileToRead(FILE** read_file, TCHAR* read_path)
 {
     if ((*read_file = fopen(read_path, "r")) == NULL)
         return 1;
@@ -8,7 +8,7 @@ int OpenFileToRead(FILE** read_file, char* read_path)
     return 0;
 }
 
-int OpenFileToWrite(FILE** read_file, char* write_path)
+int OpenFileToWrite(FILE** read_file, TCHAR* write_path)
 {
     if ((*read_file = fopen(write_path, "w")) == NULL)
         return 1;
@@ -16,11 +16,16 @@ int OpenFileToWrite(FILE** read_file, char* write_path)
     return 0;
 }
 
-int ReadFile(char* read_path, char** content)
+
+//Reads less or equal to the packet_size - 1
+int ReadFile(TCHAR* read_path, TCHAR** content, int input_packet_size)
 {
-    FILE* read_file;
-    char read_buffer[DATA_BUFSIZE];
+    FILE* read_file = NULL;
+    //TCHAR read_buffer[DATA_BUFSIZE];
     long length;
+    long byte_content = input_packet_size - 1;
+    long bytes_to_pad;
+    int content_size;
 
     if (OpenFileToRead(&read_file, read_path) != 0)
     {
@@ -37,9 +42,8 @@ int ReadFile(char* read_path, char** content)
     }
 
     length = ftell(read_file);
-    char length_string[10];
-    _itoa(length, length_string, sizeof(length_string));
-    OutputDebugString(length_string);
+
+    content_size = length > byte_content ? byte_content : length;
 
     //Seek to beginning to file to write
     if (fseek(read_file, 0L, SEEK_SET) != 0)
@@ -49,20 +53,19 @@ int ReadFile(char* read_path, char** content)
         return 1;
     }
 
-    memset(read_buffer, 0, sizeof(read_buffer));
-    fread(&read_buffer, (length + 1), sizeof(char), read_file);
+    fread(*content, content_size, sizeof(char), read_file);
 
     //Truncate garbage characters here
-    *content = read_buffer;
+    //*content = read_buffer;
 
     CloseFile(&read_file);
 
     return 0;
 }
 
-int WriteFile(char* write_path, char** write_buf)
+int WriteFile(TCHAR* write_path, TCHAR** write_buf)
 {
-    FILE* write_file;
+    FILE* write_file = NULL;
 
     if (OpenFileToWrite(&write_file, write_path) != 0)
     {

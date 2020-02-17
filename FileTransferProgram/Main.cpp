@@ -190,27 +190,22 @@ LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lP
 		{
 			switch (LOWORD(wParam))
 			{
-			case ID_CHANGE_SETTINGS_SERVER: {
-				DialogBoxA(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, SettingsDialog);
-				ShowWindow(serverhwnd, SW_HIDE);
-				ShowWindow(serverhwnd, SW_SHOW);
-				break;
-			}
-			case ID_BUTTON_RUN_SERVER: {
-
-				if ((CreateThread(NULL, 0, RunServer, setting, 0, &ServerThreadId)) == NULL)
-				{
-					char failmsg[] = "Create server thread failed!";
-					SendOutputMessage(hwndserveroutput, failmsg);
+				case ID_CHANGE_SETTINGS_SERVER: {
+					DialogBoxA(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, SettingsDialog);
+					ShowWindow(serverhwnd, SW_HIDE);
+					ShowWindow(serverhwnd, SW_SHOW);
+					break;
 				}
+				case ID_BUTTON_RUN_SERVER: {
 
+					if ((CreateThread(NULL, 0, RunServer, setting, 0, &ServerThreadId)) == NULL)
+					{
+						char failmsg[] = "Create server thread failed!";
+						SendOutputMessage(hwndserveroutput, failmsg);
+					}
 
-				break;
-			}
-			case ID_OUTPUT_SERVER: {
-
-				break;
-			}
+					break;
+				}
 			}
 			break;
 		}
@@ -250,7 +245,7 @@ LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lP
 			TCHAR update[] = "Change Settings";
 			TCHAR run_client[] = "Run Client";
 
-			hwndclientoutput = CreateWindowExA(0, "EDIT", NULL, WS_BORDER | WS_VISIBLE | WS_CHILD, MARGIN_WINDOW_SIZE, 240, 650, 250, hwnd, NULL, GetModuleHandle(NULL), NULL);
+			hwndclientoutput = CreateWindowExA(0, "EDIT", NULL, WS_BORDER | WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL, MARGIN_WINDOW_SIZE, 240, 650, 250, hwnd, NULL, GetModuleHandle(NULL), NULL);
 			setting->hwnd_clientout = hwndclientoutput;
 
 			CreateButton(hwnd, update, 520, 150, ID_CHANGE_SETTINGS_CLIENT); //Update
@@ -341,15 +336,15 @@ BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 		SetDlgItemText(hwnd, IDC_EDIT_IP_ADDRESS, setting->ip_address);
 		SetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, setting->open_file_path);
 
-		char port_number_text[BUFFER_SIZE];
+		TCHAR port_number_text[BUFFER_SIZE];
 		_itoa(setting->port_number, port_number_text, 10);
 		SetDlgItemText(hwnd, IDC_EDIT_PORT_NUMBER, port_number_text);
 
-		char packet_size_text[BUFFER_SIZE];
+		TCHAR packet_size_text[BUFFER_SIZE];
 		_itoa(setting->packet_size, packet_size_text, 10);
 		SetDlgItemText(hwnd, IDC_EDIT_PACKET_SIZE, packet_size_text);
 
-		char frequency_text[BUFFER_SIZE];
+		TCHAR frequency_text[BUFFER_SIZE];
 		_itoa(setting->client_frequency, frequency_text, 10);
 		SetDlgItemText(hwnd, IDC_EDIT_SEND_FREQUENCY, frequency_text);
 
@@ -391,19 +386,19 @@ BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 
 void SetConfiguration(HWND hwnd, Settings* setting)
 {
-	char ip_address[TEXT_BUFFER];
+	TCHAR ip_address[TEXT_BUFFER];
 	GetDlgItemText(hwnd, IDC_EDIT_IP_ADDRESS, ip_address, TEXT_BUFFER);
 	strncpy(setting->ip_address, ip_address, sizeof(ip_address));
 
-	char port_number[BUFFER_SIZE];
+	TCHAR port_number[BUFFER_SIZE];
 	GetDlgItemText(hwnd, IDC_EDIT_PORT_NUMBER, port_number, TEXT_BUFFER);
 	setting->port_number = atoi(port_number);
 
-	char packet_size[BUFFER_SIZE];
+	TCHAR packet_size[BUFFER_SIZE];
 	GetDlgItemText(hwnd, IDC_EDIT_PACKET_SIZE, packet_size, TEXT_BUFFER);
 	setting->packet_size = atoi(packet_size);
 
-	char frequency[BUFFER_SIZE];
+	TCHAR frequency[BUFFER_SIZE];
 	GetDlgItemText(hwnd, IDC_EDIT_SEND_FREQUENCY, frequency, TEXT_BUFFER);
 	setting->client_frequency = atoi(frequency);
 
@@ -415,7 +410,7 @@ void SetConfiguration(HWND hwnd, Settings* setting)
 		setting->protocol = UDP;
 	}
 
-	char open_file_path[TEXT_BUFFER];
+	TCHAR open_file_path[TEXT_BUFFER];
 	GetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, open_file_path, TEXT_BUFFER);
 	strncpy(setting->open_file_path, open_file_path, sizeof(open_file_path));
 

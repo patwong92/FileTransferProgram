@@ -1,1 +1,98 @@
-﻿  FileTransferProgram.vcxproj -> C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\Debug\FileTransferProgram.exe
+﻿  Client.cpp
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.h(6,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(169,6): warning C4101: 'client_len': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(179,13): warning C4101: 'stStartTime': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(178,21): warning C4101: 'server': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(177,18): warning C4101: 'hp': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(179,26): warning C4101: 'stEndTime': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(175,9): warning C4101: 'rbuf': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(168,6): warning C4101: 'server_len': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(180,10): warning C4101: 'stWSAData': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(167,6): warning C4101: 'err': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(178,29): warning C4101: 'client': unreferenced local variable
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Client.cpp(172,9): warning C4101: 'sd': unreferenced local variable
+  Widgets.cpp
+  Generating Code...
+resource.h(43): warning RC4005: 'NS_ALL' : redefinition
+  
+resource.h(257): warning RC4005: 'NS_SAP' : redefinition
+  
+resource.h(279): warning RC4005: 'SERVICE_MULTIPLE' : redefinition
+  
+resource.h(280): warning RC4005: 'RES_UNUSED_1' : redefinition
+  
+resource.h(382): warning RC4005: 'NS_NDS' : redefinition
+  
+resource.h(397): warning RC4005: 'RES_FLUSH_CACHE' : redefinition
+  
+resource.h(440): warning RC4005: 'NS_PEER_BROWSE' : redefinition
+  
+resource.h(512): warning RC4005: 'RES_SERVICE' : redefinition
+  
+resource.h(538): warning RC4005: 'NS_SLP' : redefinition
+  
+resource.h(560): warning RC4005: 'NS_DHCP' : redefinition
+  
+resource.h(657): warning RC4005: 'NS_TCPIP_LOCAL' : redefinition
+  
+resource.h(676): warning RC4005: 'NS_TCPIP_HOSTS' : redefinition
+  
+resource.h(690): warning RC4005: 'NS_DNS' : redefinition
+  
+resource.h(703): warning RC4005: 'NS_NETBT' : redefinition
+  
+resource.h(713): warning RC4005: 'NS_WINS' : redefinition
+  
+resource.h(723): warning RC4005: 'NS_NLA' : redefinition
+  
+resource.h(754): warning RC4005: 'NS_BTH' : redefinition
+  
+resource.h(794): warning RC4005: 'NS_LOCALNAME' : redefinition
+  
+resource.h(803): warning RC4005: 'NS_NBP' : redefinition
+  
+resource.h(862): warning RC4005: 'NS_MS' : redefinition
+  
+resource.h(868): warning RC4005: 'NS_STDA' : redefinition
+  
+resource.h(890): warning RC4005: 'NS_NTDS' : redefinition
+  
+resource.h(918): warning RC4005: 'NS_EMAIL' : redefinition
+  
+resource.h(922): warning RC4005: 'NS_PNRPNAME' : redefinition
+  
+resource.h(927): warning RC4005: 'NS_PNRPCLOUD' : redefinition
+  
+resource.h(932): warning RC4005: 'NS_X500' : redefinition
+  
+resource.h(937): warning RC4005: 'NS_NIS' : redefinition
+  
+resource.h(943): warning RC4005: 'NS_NISPLUS' : redefinition
+  
+resource.h(966): warning RC4005: 'NS_WRQ' : redefinition
+  
+resource.h(980): warning RC4005: 'NS_NETDES' : redefinition
+  
+resource.h(2041): warning RC4005: 'SHRT_MIN' : redefinition
+  
+resource.h(2069): warning RC4005: 'SCHAR_MIN' : redefinition
+  
+resource.h(2070): warning RC4005: 'HTERROR' : redefinition
+  
+resource.h(2075): warning RC4005: 'SOCKET_ERROR' : redefinition
+  
+resource.h(2076): warning RC4005: 'FROM_PROTOCOL_INFO' : redefinition
+  
+resource.h(2077): warning RC4005: 'EOF' : redefinition
+  
+resource.h(2080): warning RC4005: 'PWR_FAIL' : redefinition
+  
+resource.h(2081): warning RC4005: 'HTTRANSPARENT' : redefinition
+  
+Client.h(6): warning RC4067: unexpected characters following '#include' directive; newline expected
+  
+Main.h(28): warning RC4005: 'ID_RUN_CLIENT' : redefinition
+  
+Main.h(29): warning RC4005: 'ID_RUN_SERVER' : redefinition
+  
+  FileTransferProgram.vcxproj -> C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\Debug\FileTransferProgram.exe

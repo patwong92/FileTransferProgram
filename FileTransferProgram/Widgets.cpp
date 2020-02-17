@@ -41,15 +41,50 @@ HWND CreateButton(HWND hwnd, TCHAR text[], int x, int y, int identifier)
 	return handle;
 }
 
-void SendOutputMessage(HWND hwnd, char text[])
+void SendOutputMessage(HWND hwnd, TCHAR text[])
 {
 	TCHAR message[DATA_BUFSIZE];
-
 	GetWindowText(hwnd, message, DATA_BUFSIZE);
 	strcat(message, text);
 	strcat(message, "\r\n");
 	SetWindowText(hwnd, message);
 }
+
+void SendOutputMessage(HWND hwnd, TCHAR text[], int size)
+{
+	//TCHAR message[DATA_BUFSIZE];
+
+	//GetWindowText(hwnd, message, DATA_BUFSIZE);
+	//strcat(message, text);
+	//strcat(message, "\r\n");
+	//SetWindowText(hwnd, message);
+
+	TCHAR* message = (TCHAR*)malloc(sizeof(TCHAR) * (2*size));
+
+	if (message != NULL)
+	{
+		memset(message, 0, sizeof(TCHAR) * (2 * size));
+		GetWindowText(hwnd, message, sizeof(TCHAR) * (2 * size));
+		strncat(message, text, size);
+		strcat(message, "\r\n");
+		SetWindowText(hwnd, message);
+		free(message);
+	}
+}
+
+//Appends text2 to text1 and outputs the message
+void SendOutputMessage(HWND hwnd, TCHAR text1[], TCHAR text2[])
+{
+	TCHAR message[DATA_BUFSIZE];
+
+	GetWindowText(hwnd, message, DATA_BUFSIZE);
+	strcat(message, text1);
+	strcat(message, " ");
+	strcat(message, text2);
+	strcat(message, "\r\n");
+	SetWindowText(hwnd, message);
+}
+
 
 //CreateWindowExA(0, "STATIC", "Server Information", WS_VISIBLE | WS_CHILD,
 //	20, 20, 200, 30, hwnd, NULL, hInstance, NULL);

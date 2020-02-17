@@ -14,5 +14,5 @@ typedef struct {
 } Settings;
 
 void SetDefaultSettings(Settings* s, int port, TCHAR ip_address[], int protocol, int freq, int packet_size, const char* ofile_path, const char* dfile_path);
-void ProtocolAsString(int protocol, char* buffer);
+void ProtocolAsString(int protocol, TCHAR* buffer);
 int ProtocolAsInt(TCHAR protocol[]);

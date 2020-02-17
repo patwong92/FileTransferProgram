@@ -49,5 +49,4 @@
 #define MARGIN_WINDOW_SIZE				20
 #define TEXT_SPACING_SIZE				30
 
-
 Settings* setting = (Settings*)malloc(sizeof(Settings));

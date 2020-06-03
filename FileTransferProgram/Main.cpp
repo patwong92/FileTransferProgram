@@ -1,34 +1,36 @@
-// Program MakeWin.cpp
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: Main.cpp - An application that either acts as a server to receive file data or as a client to
+--							send file data
+--
+-- PROGRAM: FileTransferProgram
+--
+-- FUNCTIONS:
+-- LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+-- void CreateChildWindow(LPCSTR className, WNDPROC winProcedure, HINSTANCE hInstance)
+-- LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+-- LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
+-- void OnCommand(HWND handle, UINT Message, WPARAM wParam, LPARAM lParam)
+-- BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+-- void SetConfiguration(HWND hwnd, Settings* setting)
+-- TCHAR* OpenFile(HWND hwnd)
+-- void SetDefaultConnectionSettings()
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- NOTES:
+-- This program is a win32 application that utilizes the winsock2 library to handle TCP and UDP connections. The program
+-- can either set up as a TCP/UDP client to send data or a TCP/UDP server to handle data. For the server, the program uses
+-- the completion routine model to handle frequent client traffic.
+----------------------------------------------------------------------------------------------------------------------*/
 #include "Main.h"
 
-HINSTANCE hInstance;
-DWORD ServerThreadId;
-LRESULT hNewStaticBrush;
-HWND serverhwnd;
-HWND clienthwnd;
-HWND hwndserveroutput;
-HWND hwndclientoutput;
-HWND hwnd;
-
-static TCHAR Name[] = TEXT("FileTransferProgram");
-static TCHAR ServerWindowName[] = TEXT("Server Window");
-static TCHAR ClientWindowName[] = TEXT("Client Window");
-
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-void SetDefaultConnectionSettings();
-void CreateChildWindow(LPCSTR className, WNDPROC winProcedure, HINSTANCE hInstance);
-LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-void OnCommand(HWND handle, UINT Message, WPARAM wParam, LPARAM lParam);
-void SetConfiguration(HWND hwnd, Settings* setting);
-BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-TCHAR* OpenFile(HWND hwnd);
-void CreateServerWindow(HWND hwnd);
-//void HandleDisplay(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-#pragma warning (disable: 4096)
-
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInstance,
-	LPSTR lspszCmdParam, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInstance, LPSTR lspszCmdParam, int nCmdShow)
 {
 	MSG Msg;
 	WNDCLASSEX Wcl;
@@ -94,6 +96,28 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInstance,
 	return Msg.wParam;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: WndProc
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM)
+--			HWND hwnd - Window handle
+--			UINT message - Windows message
+--			WPARAM wparam - Additional message information
+--			LPARAM lparam - Additional message information
+--
+-- RETURNS: 0 if the procedure is successful
+--
+-- NOTES:
+-- Call this function to handle the event system in a Windows application.
+----------------------------------------------------------------------------------------------------------------------*/
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message,
 	WPARAM wParam, LPARAM lParam)
 {
@@ -113,6 +137,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message,
 	return 0;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: CreateChildWindow
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: void CreateChildWindow(LPCSTR className, WNDPROC winProcedure, HINSTANCE hInstance)
+--			className - Class name of the child window
+--			winProcedure - A custom windows procedure function to handle messages
+--			hInstance - Handle to the program's executable module
+--
+-- RETURNS: void.
+--
+-- NOTES:
+-- Call this function to “daemonize” the application. Basically this function forks a new process,
+-- allows the parent process to exit after setting the umask on the child process as global.
+----------------------------------------------------------------------------------------------------------------------*/
 void CreateChildWindow(LPCSTR className, WNDPROC winProcedure, HINSTANCE hInstance)
 {
 	HWND serverhwmd;
@@ -137,6 +183,28 @@ void CreateChildWindow(LPCSTR className, WNDPROC winProcedure, HINSTANCE hInstan
 	RegisterClassEx(&Wcl);
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ServerWndProc
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+--			HWND hwnd - Window handle
+--			UINT message - Windows message
+--			WPARAM wparam - Additional message information
+--			LPARAM lparam - Additional message information
+--
+-- RETURNS: 0 if the function ends.
+--
+-- NOTES:
+-- Call this function handle window events of the server child window.
+----------------------------------------------------------------------------------------------------------------------*/
 LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)
@@ -219,6 +287,28 @@ LRESULT CALLBACK ServerWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ClientWndProc
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+--			HWND hwnd - Window handle
+--			UINT message - Windows message
+--			WPARAM wparam - Additional message information
+--			LPARAM lparam - Additional message information
+--
+-- RETURNS: 0 if the function ends.
+--
+-- NOTES:
+-- Call this function handle window events of the client child window.
+----------------------------------------------------------------------------------------------------------------------*/
 LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)
@@ -303,10 +393,28 @@ LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
-//LRESULT CALLBACK ClientWndProc(HWND hwnd, UINT Message,
-//	WPARAM wParam, LPARAM lParam){}
-
-//Handles Menu navigation
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: OnCommand
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: void OnCommand(HWND handle, UINT Message, WPARAM wParam, LPARAM lParam)
+--			HWND hwnd - Window handle
+--			UINT message - Windows message
+--			WPARAM wparam - Additional message information
+--			LPARAM lparam - Additional message information
+--
+-- RETURNS: void
+--
+-- NOTES:
+-- Call this function to handle menu messages in the window application. Requires the use of LOWORD(wParam).
+----------------------------------------------------------------------------------------------------------------------*/
 void OnCommand(HWND handle, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (LOWORD(wParam))
@@ -329,12 +437,37 @@ void OnCommand(HWND handle, UINT Message, WPARAM wParam, LPARAM lParam)
 	}
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: SettingsDialog
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+--			HWND hwnd - Window handle
+--			UINT message - Windows message
+--			WPARAM wparam - Additional message information
+--			LPARAM lparam - Additional message information
+--
+-- RETURNS: 1 if dialogbox is successful
+--			0 if dialogbox is unsuccessful
+--
+-- NOTES:
+-- Handles the buttons, texts and events of the dialog box.
+-- The dialog box will be used to update the Settings structure for client and server parameters.
+----------------------------------------------------------------------------------------------------------------------*/
 BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_INITDIALOG: {
 		SetDlgItemText(hwnd, IDC_EDIT_IP_ADDRESS, setting->ip_address);
 		SetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, setting->open_file_path);
+		SetDlgItemText(hwnd, IDC_EDIT_SAVE_FILE_PATH, setting->save_file_path);
 
 		TCHAR port_number_text[BUFFER_SIZE];
 		_itoa(setting->port_number, port_number_text, 10);
@@ -359,31 +492,56 @@ BOOL CALLBACK SettingsDialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 	case WM_COMMAND: {
 		switch (LOWORD(wParam))
 		{
-		case IDC_BUTTON_OPEN_FILE: {
-			TCHAR file_path[TEXT_BUFFER];
-			TCHAR* ws_file_path = OpenFile(hwnd);
-			strncpy(file_path, ws_file_path, sizeof(file_path));
-			SetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, file_path);
-			break;
+			case IDC_BUTTON_OPEN_FILE: {
+				TCHAR file_path[FILE_PATH_BUFFER];
+				TCHAR* ws_file_path = OpenFile(hwnd);
+				strncpy(file_path, ws_file_path, sizeof(file_path));
+				SetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, file_path);
+				break;
+			}
+			case IDC_BUTTON_SAVE_RECEIVED_FILES: {
+				TCHAR file_path[FILE_PATH_BUFFER];
+				TCHAR* ws_file_path = OpenFile(hwnd);
+				strncpy(file_path, ws_file_path, sizeof(file_path));
+				SetDlgItemText(hwnd, IDC_EDIT_SAVE_FILE_PATH, file_path);
+				break;
+			}
+			case IDOK: {
+				SetConfiguration(hwnd, setting);
+				EndDialog(hwnd, IDOK);
+				break;
+			}
+			case IDCANCEL:
+				EndDialog(hwnd, IDCANCEL);
+				break;
+			}
+			return TRUE;
 		}
-		case IDOK: {
-			SetConfiguration(hwnd, setting);
-			EndDialog(hwnd, IDOK);
-			break;
-		}
-
-		case IDCANCEL:
-			EndDialog(hwnd, IDCANCEL);
-			break;
-		}
-
-		return TRUE;
-	}
 	}
 
 	return FALSE;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: SetConfiguration
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: void SetConfiguration(HWND hwnd, Settings* setting)
+--			HWND hwnd - Window handle
+--			Settings* setting - Pointer to the Settings structure to store server and client parameters
+--
+-- RETURNS: void
+--
+-- NOTES:
+-- Updates user input to the Settings structure.
+----------------------------------------------------------------------------------------------------------------------*/
 void SetConfiguration(HWND hwnd, Settings* setting)
 {
 	TCHAR ip_address[TEXT_BUFFER];
@@ -414,10 +572,33 @@ void SetConfiguration(HWND hwnd, Settings* setting)
 	GetDlgItemText(hwnd, IDC_EDIT_OPEN_FILE, open_file_path, TEXT_BUFFER);
 	strncpy(setting->open_file_path, open_file_path, sizeof(open_file_path));
 
+	TCHAR save_file_path[TEXT_BUFFER];
+	GetDlgItemText(hwnd, IDC_EDIT_SAVE_FILE_PATH, save_file_path, TEXT_BUFFER);
+	strncpy(setting->save_file_path, save_file_path, sizeof(save_file_path));
+
 	UpdateWindow(serverhwnd);
 	UpdateWindow(clienthwnd);
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: OpenFile
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: TCHAR* OpenFile(HWND hwnd)
+--			HWND hwnd - Window handle
+--
+-- RETURNS: ofn.lpstrFile - File path from the Open File dialog box
+--
+-- NOTES:
+-- This function opens the file dialog box for the user to locate the file path to use.
+----------------------------------------------------------------------------------------------------------------------*/
 TCHAR* OpenFile(HWND hwnd)
 {
 	TCHAR file_name[MAX_PATH];
@@ -434,7 +615,7 @@ TCHAR* OpenFile(HWND hwnd)
 	ofn.Flags = OFN_FILEMUSTEXIST;
 
 	if (!GetOpenFileName(&ofn)) {
-		TCHAR response[TEXT_BUFFER];
+		TCHAR response[FILE_PATH_BUFFER];
 		strncpy(response, "./", sizeof(response));
 		return response;
 	}
@@ -442,11 +623,30 @@ TCHAR* OpenFile(HWND hwnd)
 	return ofn.lpstrFile;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: SetDefaultConnectionSettings
+--
+-- DATE: February 11, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: void SetDefaultConnectionSettings(void)
+--
+-- RETURNS: void.
+--
+-- NOTES:
+-- Call this function to set the default values to the Settings structure. The data members are useful in setting up the
+-- client or server parameters
+----------------------------------------------------------------------------------------------------------------------*/
 void SetDefaultConnectionSettings()
 {
 	TCHAR default_ip[TEXT_BUFFER] = DEFAULT_IP_ADDRESS;
-	TCHAR default_open_file[TEXT_BUFFER] = DEFAULT_OPEN_FILE_PATH;
-	TCHAR default_close_file[TEXT_BUFFER] = DEFAULT_OPEN_FILE_PATH;
+	TCHAR default_open_file[FILE_PATH_BUFFER] = DEFAULT_OPEN_FILE_PATH;
+	TCHAR default_close_file[FILE_PATH_BUFFER] = DEFAULT_SAVE_FILE_PATH;
 
 	SetDefaultSettings(setting,
 		DEFAULT_PORT_NUMBER, default_ip, UDP, DEFAULT_SEND_FREQUENCY,

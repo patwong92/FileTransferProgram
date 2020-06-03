@@ -1,10 +1,60 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: RunServer.cpp - Provides functions to receive TCP/UDP data
+--
+-- PROGRAM: FileTransferProgram
+--
+-- FUNCTIONS:
+-- DWORD WINAPI RunServer(LPVOID lpParameter)
+-- DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
+-- DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
+-- void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred, LPWSAOVERLAPPED Overlapped, DWORD InFlags)
+-- DWORD CreateSocket(SOCKET* socket, int protocol)
+-- SOCKADDR_IN FillAddrStructure(Settings* setting)
+-- DWORD WINAPI WaitingForTCPConnections(LPVOID lpParameter)
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- NOTES:
+-- This cpp file provides functions to receive TCP packets or UDP datagrams. The model used to handle TCP packets is the
+-- completion I/O mode. The model used to handle UDP datagrams is the overlapped I/O model. Both models are needed to
+-- enhance the data output, avoid extra copies, and allow flexibility in timing relationship between the socket and the 
+-- network. 
+----------------------------------------------------------------------------------------------------------------------*/
 #include "ConnectionManager.h"
 
 SOCKET AcceptSocket;
 WSAEVENT UDPReceiveEvent;
 SOCKET* ListenSocket;
 HWND serveroutput;
+char* write_file_path;
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: RunServer
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: DWORD WINAPI RunServer(LPVOID lpParameter)
+--			LPVOID lpParameter - Long pointer to a parameter. In this case, the parameter is the Settings structure.
+--
+-- RETURNS: TRUE or 1 if the function call is successful
+--			FALSE or 0 if the function call encounters an error.
+--
+-- NOTES:
+-- This function identifies the protocol and runs the associated thread. If the protocol is TCP, then the function
+-- calls the TCPWorkerThread. If the protocol is UDP, then the function calls the UDPWorkerThread.
+----------------------------------------------------------------------------------------------------------------------*/
 DWORD WINAPI RunServer(LPVOID lpParameter)
 {
     WSADATA wsaData;
@@ -18,6 +68,7 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     Settings* s = (Settings*)lpParameter;
     int protocol = s->protocol;
     serveroutput = s->hwnd_serverout;
+    write_file_path = s->save_file_path;
 
     WSACleanup();
 
@@ -137,6 +188,27 @@ DWORD WINAPI RunServer(LPVOID lpParameter)
     return TRUE;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: TCPWorkerThread
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
+--			LPVOID lpParameter - Long pointer to a parameter. In this case, the parameter is the WSAEVENT structure.
+--
+-- RETURNS: TRUE or 1 if the function call is successful
+--			FALSE or 0 if the function call encounters an error.
+--
+-- NOTES:
+-- This thread function continuously waits, and accepts for any events. If there is an event, then the function calls
+-- in a TCPWorkerRoutine to handle the data transfer.
+----------------------------------------------------------------------------------------------------------------------*/
 DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
 {
     DWORD Flags;
@@ -216,6 +288,29 @@ DWORD WINAPI TCPWorkerThread(LPVOID lpParameter)
     return TRUE;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: TCPWorkerRoutine
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred, LPWSAOVERLAPPED Overlapped, DWORD InFlags)
+--			DWORD Error - Error code
+--			DWORD BytesTransferred - Bytes transferred to the server
+--			LPWSAOVERLAPPED overlapped - Long pointer to the overlapped structure
+--			DWORD InFlags - Flags (unused)
+--
+-- RETURNS: TRUE or 1 if the function call is successful
+--			FALSE or 0 if the function call encounters an error.
+--
+-- NOTES:
+-- This thread function recursively receives bytes from the socket until there is no more data to receive.
+----------------------------------------------------------------------------------------------------------------------*/
 void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
     LPWSAOVERLAPPED Overlapped, DWORD InFlags)
 {
@@ -268,7 +363,7 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         SI->DataBuf.buf = SI->Buffer + SI->BytesSEND;
         SI->DataBuf.len = SI->BytesRECV - SI->BytesSEND;
 
-        SendOutputMessage(serveroutput, SI->Buffer); //Output text 
+        /*SendOutputMessage(serveroutput, SI->Buffer);*/ //Output text 
         
         if (WSASend(SI->Socket, &(SI->DataBuf), 1, &SendBytes, 0,
             &(SI->Overlapped), TCPWorkerRoutine) == SOCKET_ERROR)
@@ -313,16 +408,41 @@ void CALLBACK TCPWorkerRoutine(DWORD Error, DWORD BytesTransferred,
         TCHAR resp_byte[20];
         _itoa(SI->BytesRECV, resp_byte, 10);
         SendOutputMessage(serveroutput, resp_msg, resp_byte);
+
+        if (WriteFile(write_file_path, &SI->DataBuf.buf) != 0)
+        {
+            TCHAR error_msg[] = "Error in writing data to file!";
+            SendOutputMessage(serveroutput, error_msg);
+        }
     }
 
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: UDPWorkerThread
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
+--			LPVOID lpParameter - Long pointer to a parameter. In this case, the parameter is unused.
+--
+-- RETURNS: TRUE or 1 if the function call is successful
+--			FALSE or 0 if the function call encounters an error.
+--
+-- NOTES:
+-- This thread function creates an overlapped event and waits for multiple events. IF there is an multiple event,
+-- then the function gets the overlapped result, reads the datagram, and sends back the datagram to the source.
+----------------------------------------------------------------------------------------------------------------------*/
 DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
 {
     DWORD Flags;
     LPSOCKET_INFORMATION SocketInfo;
-    //WSAEVENT EventArray[1];
-    //DWORD Index;
     DWORD RecvBytes;
     SOCKADDR_IN  client;
     DWORD rc;
@@ -345,7 +465,7 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
     ZeroMemory(&(SocketInfo->Overlapped), sizeof(WSAOVERLAPPED));
     SocketInfo->BytesSEND = 0;
     SocketInfo->BytesRECV = 0;
-    SocketInfo->DataBuf.len = DATA_BUFSIZE;
+    SocketInfo->DataBuf.len = 65000;
     SocketInfo->DataBuf.buf = SocketInfo->Buffer;
     SocketInfo->Overlapped.hEvent = WSACreateEvent();
 
@@ -383,14 +503,26 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
                 }
                 else
                 {
-                    TCHAR receive_msg1[] = "Number of received bytes =";
+                    TCHAR receive_msg1[] = "Number of bytes received =";
                     TCHAR receive_msg2[] = "Server received:";
                     TCHAR resp_byte[20];
                     _itoa(SocketInfo->BytesRECV, resp_byte, 10);
 
                     SendOutputMessage(serveroutput, receive_msg1, resp_byte);
-                    SendOutputMessage(serveroutput, receive_msg2);
-                    SendOutputMessage(serveroutput, SocketInfo->Buffer);
+                    //SendOutputMessage(serveroutput, receive_msg2);
+                    //SendOutputMessage(serveroutput, SocketInfo->Buffer);
+
+                    if (WriteFile(write_file_path, &SocketInfo->DataBuf.buf) != 0)
+                    {
+                        TCHAR error_msg[] = "Error in writing data to file!";
+                        SendOutputMessage(serveroutput, error_msg);
+                    }
+
+                    //Echo response to client
+                    WSASendTo(*ListenSocket, &(SocketInfo->DataBuf),
+                        1, &(SocketInfo->BytesRECV), Flags, (SOCKADDR*)&client,
+                        client_len, &(SocketInfo->Overlapped), NULL);
+
                 }
             }
 
@@ -400,7 +532,28 @@ DWORD WINAPI UDPWorkerThread(LPVOID lpParameter)
     return TRUE;
 }
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: CreateSocket
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: DWORD CreateSocket(SOCKET* socket, int protocol);
+--			SOCKET* socket - Pointer to a SOCKET structure
+--			int protocol - Protocol code
+--
+-- RETURNS: 0 if the function call is successful
+--			1 if the function call encounters an error.
+--
+-- NOTES:
+-- This function identifies the protocol and modifies the type for use in the WSASocket() call. If the protocol is TCP,
+-- then the type is SOCK_STREAM. If the protocol is UDP, the type is SOCK_DGRAM
+----------------------------------------------------------------------------------------------------------------------*/
 DWORD CreateSocket(SOCKET* socket, int protocol)
 {
     int protocol_flag = IPPROTO_TCP;
@@ -421,6 +574,25 @@ DWORD CreateSocket(SOCKET* socket, int protocol)
     return 0;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: FillAddrStructure
+--
+-- DATE: February 15, 2020
+--
+-- REVISIONS: February 18, 2020, Finalized implementation
+--
+-- DESIGNER: Patrick Wong
+--
+-- PROGRAMMER: Patrick Wong
+--
+-- INTERFACE: SOCKADDR_IN FillAddrStructure(Settings* setting)
+--			Settings* setting - Pointer to the Settings structure
+--
+-- RETURNS: SOCK_ADDR_IN structure with initialized data members.
+--
+-- NOTES:
+-- This function fills in the SOCKADDR_IN structure for use in connect() in TCP.
+----------------------------------------------------------------------------------------------------------------------*/
 SOCKADDR_IN FillAddrStructure(Settings* setting)
 {
     SOCKADDR_IN addr;

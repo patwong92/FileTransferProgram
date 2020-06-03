@@ -1,0 +1,6 @@
+﻿  Generating code
+  Previous IPDB not found, fall back to full compilation.
+C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\FileTransferProgram\Main.cpp(620): warning C4172: returning address of local variable or temporary: response
+  All 38 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  FileTransferProgram.vcxproj -> C:\Users\pwong\Documents\BCIT Level 4\COMP 4985 - Data Comm & Internetworking\Asn02\FileTransferProgram\Release\FileTransferProgram.exe

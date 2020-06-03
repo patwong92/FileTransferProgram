@@ -10,8 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DATA_BUFSIZE 8192
+#define DATA_BUFSIZE 100000
 #define TEXT_BUFFER 64
+#define FILE_PATH_BUFFER 128
 #define TCP 500
 #define UDP 501
 

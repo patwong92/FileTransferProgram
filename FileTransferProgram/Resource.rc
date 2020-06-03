@@ -1,7 +1,12 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "Main.h"
-#include "windows.h"
+/////////////////////////////////////////////////////////////////////////////
+// English (Canada) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENC)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_CAN
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -35,13 +40,71 @@ BEGIN
     EDITTEXT        IDC_EDIT_IP_ADDRESS,122,21,166,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_PORT_NUMBER,122,42,166,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_PACKET_SIZE,122,84,167,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Open File",IDC_BUTTON_OPEN_FILE,49,121,63,14
-    EDITTEXT        IDC_EDIT_OPEN_FILE,122,122,165,12,ES_AUTOHSCROLL
-    CONTROL         "TCP",IDC_RADIO_TCP,"Button",BS_AUTORADIOBUTTON,122,105,29,10
-    CONTROL         "UDP",IDC_RADIO_UDP,"Button",BS_AUTORADIOBUTTON,155,105,30,10
+    PUSHBUTTON      "Open File",IDC_BUTTON_OPEN_FILE,50,114,63,14
+    EDITTEXT        IDC_EDIT_OPEN_FILE,122,115,165,14,ES_AUTOHSCROLL
+    CONTROL         "TCP",IDC_RADIO_TCP,"Button",BS_AUTORADIOBUTTON,122,100,29,10
+    CONTROL         "UDP",IDC_RADIO_UDP,"Button",BS_AUTORADIOBUTTON,152,100,30,10
     LTEXT           "IP Address",IDC_TEXT_IP_ADDRESS,45,23,62,10,SS_CENTERIMAGE,WS_EX_RIGHT
     LTEXT           "Port Number",IDC_TEXT_PORT_NUMBER,51,42,57,10,0,WS_EX_RIGHT
     LTEXT           "Client Packet size",IDC_STATIC,36,87,76,9,0,WS_EX_RIGHT
     EDITTEXT        IDC_EDIT_SEND_FREQUENCY,122,63,167,12,ES_AUTOHSCROLL
     LTEXT           "Client Send Frequency",IDC_STATIC,35,64,76,9,0,WS_EX_RIGHT
+    PUSHBUTTON      "Save Received Files",IDC_BUTTON_SAVE_RECEIVED_FILES,35,134,78,17
+    EDITTEXT        IDC_EDIT_SAVE_FILE_PATH,121,136,167,14,ES_AUTOHSCROLL
 END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (Canada) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
